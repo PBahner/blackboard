@@ -523,20 +523,32 @@ public class BoardDesignerPerspective extends AbstractPerspective implements IMe
 			final Unmarshaller u = (Unmarshaller) JAXBContext.newInstance(FileList.class).createUnmarshaller();
 			final FileList files = (FileList) u.unmarshal(new FileInputStream(new File(dir + ID + ".xml")));
 
+			int validFiles = 0;
+			for (final String path : files.getFiles()) {
+				File file = new File(path);
+				if (file.exists()) {
+					validFiles++;
+				}
+			}
+
 			int count = 0;
 
 			for (final String path : files.getFiles()) {
 				log.info("Opening editor for :" + path);
-				OpenBoardCommand cmd = new OpenBoardCommand(path, new File(path));
+				File file = new File(path);
+				if (file.exists()) {
+					OpenBoardCommand cmd = new OpenBoardCommand(path, file);
 
-				// the last command needs a trigger for perspective restore
-				if (count == files.getFiles().size() - 1) {
-					cmd.addPostConfigurator(new LoadViewStateEvent());
-					cmd.addPostConfigurator(new ViewStateDoneEvent());
+					// the last command needs a trigger for perspective restore
+					if (count == validFiles - 1) {
+						cmd.addPostConfigurator(new LoadViewStateEvent());
+						cmd.addPostConfigurator(new ViewStateDoneEvent());
+					}
+
+					cmd.execute(null);
+					count++;
 				}
 
-				cmd.execute(null);
-				count++;
 			}
 
 			horizontalSplitPane.setDividerLocation(configProvider.getConfig().getDividerLocation());
@@ -569,6 +581,7 @@ public class BoardDesignerPerspective extends AbstractPerspective implements IMe
 		try {
 
 			Marshaller m = (Marshaller) JAXBContext.newInstance(FileList.class).createMarshaller();
+			m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 			m.marshal(files, new FileOutputStream(new File(dir + ID + ".xml")));
 			if (viewMap.getViewCount() > 0)
 				saveViewState();

@@ -116,7 +116,7 @@ public class OpenBoardCommand extends AbstractOpenEditorCommand {
 		final ApplicationWindow win = ctx.getBean(ApplicationWindow.class);
 		
 		// No file selected before, popup a dialog and query the user which file to open.
-		if (file == null) {					
+		if (file == null || !file.exists()) {
 			String path = System.getProperty("user.home");					
 			if (AppContext.getLastSelectedFolder() != null) {
 				path = AppContext.getLastSelectedFolder();

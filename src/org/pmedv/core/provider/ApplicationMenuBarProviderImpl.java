@@ -239,6 +239,9 @@ public class ApplicationMenuBarProviderImpl implements ApplicationMenuBarProvide
 						
 						for (String recentFile : fileList.getRecentFiles()) {							
 							File file = new File(recentFile);
+							if (!file.exists()) {
+								continue;
+							}
 							AbstractCommand openBoardAction = new OpenBoardCommand(file.getName(), file);							
 							JMenuItem item = new JMenuItem(openBoardAction);
 							openRecentMenu.add(item);

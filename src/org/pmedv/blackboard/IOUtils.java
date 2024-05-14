@@ -25,9 +25,7 @@ package org.pmedv.blackboard;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.Iterator;
 
 import javax.imageio.ImageIO;
@@ -325,7 +323,7 @@ public class IOUtils {
 	 * 
 	 * @param filename the name to append to the list
 	 */
-	public static void updateRecentFiles(String filename) {
+	public static synchronized void updateRecentFiles(String filename) {
 		RecentFileList fileList = null;
 		try {
 			String inputDir = System.getProperty("user.home") + "/." + AppContext.getName() + "/";
