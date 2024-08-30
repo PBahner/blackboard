@@ -2,3 +2,4 @@ CVS/
 build/
 bin/
 dist/
+.idea/
