@@ -79,7 +79,7 @@ public class ExportImageDialog extends AbstractNiceDialog {
 
 		editor = EditorUtils.getCurrentActiveEditor();
 
-		setSize(new Dimension(640, 550));
+		setSize(new Dimension(640, 600));
 		getContentPanel().add(exportPanel);
 
 		getOkButton().addActionListener(new ActionListener() {
