@@ -98,8 +98,8 @@ public class AddResistorCommand extends AbstractEditorCommand {
 		boolean onPartLayer = false;
 		
 		for (Layer layer : editor.getModel().getLayers()) {
-			if (layer.getIndex() == BoardEditorModel.PART_LAYER) {
-				resistor.setLayer(BoardEditorModel.PART_LAYER);
+			if (layer.getName().equals(BoardEditorModel.PART_LAYER_NAME)) {
+				resistor.setLayer(layer.getIndex());
 				onPartLayer = true;
 				break;
 			}

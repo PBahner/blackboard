@@ -71,7 +71,7 @@ public class DeleteLayerCommand extends AbstractCommand {
 				deletedLayers.add(current);
 			}
 
-			for (Layer current : deletedLayers) {					
+			for (Layer current : deletedLayers) {
 				layerPanel.getLayerModel().removeLayer(current);
 				editor.getModel().getLayers().remove(current);
 			}

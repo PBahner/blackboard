@@ -49,11 +49,21 @@ import org.pmedv.blackboard.components.TextPart;
 public class BoardEditorModel {
 	
 	public static final Log log = LogFactory.getLog(BoardEditorModel.class);
-	
-	public static final int TOP_LAYER = 0;
-	public static final int BOTTOM_LAYER = 1;
-	public static final int PART_LAYER = 2;
-	public static final int BOARD_LAYER = 3;
+
+	/*
+	WARNING
+	Do not use XX_LAYER_INDEX for identifying layers.
+	This will cause problems because it can be changed through the user (by changing the layer hierarchy).
+	Use it only on initialization!
+	 */
+	protected static final int TOP_LAYER_INDEX = 0;
+	public static final String TOP_LAYER_NAME = "Top";
+	protected static final int BOTTOM_LAYER = 1;
+	public static final String BOTTOM_LAYER_NAME = "Bottom";
+	public static final int PART_LAYER_INDEX = 2;
+	public static final String PART_LAYER_NAME = "Parts";
+	protected static final int BOARD_LAYER = 3;
+	public static final String BOARD_LAYER_NAME = "Board";
 	
 	public static enum BoardType {
 		HOLES,
@@ -77,10 +87,10 @@ public class BoardEditorModel {
 	}
 
 	public void addDefaultLayers() {
-		layers.add(new Layer(TOP_LAYER,"Top", Color.RED));
-		layers.add(new Layer(BOTTOM_LAYER,"Bottom", Color.BLUE));
-		layers.add(new Layer(PART_LAYER,"Parts"));
-		layers.add(new Layer(BOARD_LAYER,"Board"));
+		layers.add(new Layer(TOP_LAYER_INDEX, TOP_LAYER_NAME, Color.RED));
+		layers.add(new Layer(BOTTOM_LAYER, BOTTOM_LAYER_NAME, Color.BLUE));
+		layers.add(new Layer(PART_LAYER_INDEX, PART_LAYER_NAME));
+		layers.add(new Layer(BOARD_LAYER, BOARD_LAYER_NAME));
 	}
 	
 	/**
@@ -106,6 +116,22 @@ public class BoardEditorModel {
 			
 		
 		return null;
+	}
+
+	public Layer getLayer(String name) {
+		for (Layer l : layers) {
+			if (l.getName().equals(name))
+				return l;
+		}
+		return null;
+	}
+
+	public int getLayerIndexByName(String name) {
+		for (Layer l : layers) {
+			if (l.getName().equals(name))
+				return  l.getIndex();
+		}
+		return -1;
 	}
 
 	/**

@@ -293,7 +293,7 @@ public class BoardEditor extends JPanel implements MouseMotionListener{
 		setOpaque(false);
 		listeners = new ArrayList<EditorChangedListener>();
 		this.model = model;
-		model.setCurrentLayer(model.getLayer(BoardEditorModel.TOP_LAYER));
+		model.setCurrentLayer(model.getLayer(BoardEditorModel.TOP_LAYER_NAME));
 		
 		if (model.getType() != null && !model.getType().equals(BoardType.SCHEMATICS)) {
 			if (model.getType().equals(BoardType.CUSTOM)) {

@@ -191,7 +191,7 @@ public final class PartFactory {
 		p.setFilename(name);
 		p.setOldXLoc(p.getXLoc());
 		p.setOldYLoc(p.getYLoc());
-		p.setLayer(BoardEditorModel.PART_LAYER);
+		p.setLayer(BoardEditorModel.PART_LAYER_INDEX);
 
 		// image has failed loading, we display the noresource image and give it
 		// a default size

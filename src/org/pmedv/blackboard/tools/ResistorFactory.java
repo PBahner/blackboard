@@ -81,7 +81,7 @@ public class ResistorFactory {
 	public Resistor getResistor(int value, float tolerance) {
 		Resistor resistor = new Resistor(32, 32, 96, 32, 0, value, tolerance);
 		resistor.setBody(getImageForValue(value,5.0f));	
-		resistor.setLayer(BoardEditorModel.PART_LAYER);
+		resistor.setLayer(BoardEditorModel.PART_LAYER_INDEX);
 		return resistor;
 	}
 
