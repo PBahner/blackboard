@@ -154,8 +154,10 @@ public class ApplicationWindowAdvisorImpl implements ApplicationWindowAdvisor {
             final boolean isDarkThemeUsed = detector.isDark();
             if (isDarkThemeUsed) {
                 UIManager.setLookAndFeel(new FlatDarkLaf());
+                UIManager.put("Table.stripedRowBackgroundColor", Color.DARK_GRAY);
             } else {
                 UIManager.setLookAndFeel(new FlatLightLaf());
+                UIManager.put("Table.stripedRowBackgroundColor", Color.LIGHT_GRAY);
             }
 
         } catch (UnsupportedLookAndFeelException e) {
