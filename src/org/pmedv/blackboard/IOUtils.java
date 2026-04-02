@@ -157,9 +157,11 @@ public class IOUtils {
 		}
 		
 		File[] files = tempDir.listFiles();
-		for (int i = 0; i < files.length; i++) {
-			if (files[i].getName().endsWith("xml")) {
-				return files[i];
+        for (File f: files) {
+			String filename = f.getName();
+			boolean isDirectChild = !filename.contains("/") && !filename.contains("\\");
+			if (isDirectChild && filename.endsWith("xml")) {
+				return f;
 			}
 		}
 		
