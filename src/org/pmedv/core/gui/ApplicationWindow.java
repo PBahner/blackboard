@@ -87,7 +87,6 @@ public class ApplicationWindow extends AbstractApplicationWindow implements Edit
 		JPanel toolbarPanel = new JPanel(new BorderLayout());
 		this.add(toolBar, java.awt.BorderLayout.NORTH);
 		statusBar = new JPanel();
-		statusBar.setBackground(Color.DARK_GRAY);
 		ImageIcon offlineIcon = resources.getIcon("icon.status.offline");
 		statusLabel = new JLabel();
 		statusBar.add(statusLabel);

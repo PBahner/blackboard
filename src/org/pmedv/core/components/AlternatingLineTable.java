@@ -31,7 +31,11 @@ public class AlternatingLineTable extends JXTable {
 		Component c = super.prepareRenderer(renderer, row, column);
 
 		if (row % 2 == 0 && !isCellSelected(row, column)) {
-			c.setBackground(Color.DARK_GRAY);
+			if (getBackground().equals(Color.WHITE)) {
+				c.setBackground(Color.LIGHT_GRAY);
+			} else {
+				c.setBackground(Color.DARK_GRAY);
+			}
 		}
 		else {
 			if (isCellSelected(row, column)) {

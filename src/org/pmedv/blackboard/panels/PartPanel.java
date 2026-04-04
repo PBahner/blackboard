@@ -64,7 +64,6 @@ public class PartPanel extends JPanel {
 		imagePanel.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
 		imageLabel.setText(null);
 		imagePanel.setBackground(Colors.LIGHTER_GRAY);
-		bottomPanel.setBackground(Color.WHITE);
 	}
 
 	private void initComponents() {

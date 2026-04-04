@@ -36,20 +36,14 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import javax.swing.*;
-import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
 import com.formdev.flatlaf.extras.FlatInspector;
 import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
-import com.formdev.flatlaf.util.SystemInfo;
-import com.jthemedetecor.OsThemeDetector;
 import net.infonode.docking.TabWindow;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jdesktop.swingx.painter.MattePainter;
-import org.pmedv.blackboard.dialogs.DatasheetDialog;
-import org.pmedv.blackboard.dialogs.PartDialog;
-import org.pmedv.blackboard.dialogs.SpiceSimulatorManageDialog;
+import org.pmedv.blackboard.LookAndFeelUtil;
 import org.pmedv.core.beans.ApplicationPerspective;
 import org.pmedv.core.beans.ApplicationWindowConfiguration;
 import org.pmedv.core.components.IMemento;
@@ -60,14 +54,6 @@ import org.pmedv.core.provider.ApplicationPerspectiveProvider;
 import org.pmedv.core.provider.ApplicationWindowConfigurationProvider;
 import org.pmedv.core.services.ResourceService;
 import org.springframework.context.ApplicationContext;
-
-import com.formdev.flatlaf.FlatDarculaLaf;
-import com.formdev.flatlaf.FlatDarkLaf;
-import com.formdev.flatlaf.FlatIntelliJLaf;
-import com.formdev.flatlaf.FlatLightLaf;
-import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
-import com.jgoodies.looks.plastic.theme.SkyBluer;
-//import com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel;
 
 
 public class ApplicationWindowAdvisorImpl implements ApplicationWindowAdvisor {
@@ -149,62 +135,26 @@ public class ApplicationWindowAdvisorImpl implements ApplicationWindowAdvisor {
 
         log.info("initializing.");
 
-        try {
-            final OsThemeDetector detector = OsThemeDetector.getDetector();
-            final boolean isDarkThemeUsed = detector.isDark();
-            if (isDarkThemeUsed) {
-                UIManager.setLookAndFeel(new FlatDarkLaf());
-            } else {
-                UIManager.setLookAndFeel(new FlatLightLaf());
-            }
+        String laf = (String) Preferences.values.get("org.pmedv.blackboard.BoardDesignerPerspective.lookAndFeel");
 
-        } catch (UnsupportedLookAndFeelException e) {
-            log.info("failed to set look and feel.");
-            e.printStackTrace();
-        }
+        LookAndFeelUtil.applyLookAndFeel(laf);
 
-        // make FlatInspector available via shortcut
-        FlatInspector.install( "ctrl alt shift X" );
-        FlatUIDefaultsInspector.install( "ctrl shift alt Y" );
-
-        /**
-         String laf = (String) Preferences.values.get("org.pmedv.blackboard.BoardDesignerPerspective.lookAndFeel");
-         try {
-         if (laf.equals("Nimbus")) {
-         UIManager.setLookAndFeel(new NimbusLookAndFeel());
-         }
-         if (laf.equals("FlatDarcula")) {
-         UIManager.setLookAndFeel( new FlatDarculaLaf());
-         }
-         if (laf.equals("SkyBlue")) {
-         Plastic3DLookAndFeel.setPlasticTheme(new SkyBluer());
-         UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
-         com.jgoodies.looks.Options.setPopupDropShadowEnabled(true);
-         }
-         if (laf.equals("System")) {
-         UIManager.setLookAndFeel( new FlatDarkLaf());
-         }
-         else {
-         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-         }
-         }
-         catch (Exception e2) {
-         log.info("failed to set look and feel.");
-         }
-         */
+        // Make inspectors available
+        FlatInspector.install("ctrl alt shift X");
+        FlatUIDefaultsInspector.install("ctrl shift alt Y");
 
         SwingUtilities.updateComponentTreeUI(win);
 
+		/*
         final Color blackboardLightBlue = new Color(225, 234, 242);
         final Color blackBoardDarkBlue = new Color(182, 191, 205);
         final Color blackboardLightGrey = new Color(220, 220, 222);
-		
-		/*
-        UIManager.put("TaskPane.titleBackgroundGradientStart", Color.WHITE);        
-        UIManager.put("TaskPane.titleBackgroundGradientEnd",blackboardLightBlue); 
-        UIManager.put("TaksPane.specialTitleBackground",blackboardLightBlue); 
-        UIManager.put("TaskPane.titleBackground",blackboardLightBlue); 
-        UIManager.put("TaskPane.borderColor",blackboardLightBlue);        
+
+        UIManager.put("TaskPane.titleBackgroundGradientStart", Color.WHITE);
+        UIManager.put("TaskPane.titleBackgroundGradientEnd",blackboardLightBlue);
+        UIManager.put("TaksPane.specialTitleBackground",blackboardLightBlue);
+        UIManager.put("TaskPane.titleBackground",blackboardLightBlue);
+        UIManager.put("TaskPane.borderColor",blackboardLightBlue);
         UIManager.put("TaskPane.background",blackboardLightGrey);
         UIManager.put("TaskPaneContainer.backgroundPainter", new MattePainter(blackBoardDarkBlue));
         */
@@ -269,7 +219,6 @@ public class ApplicationWindowAdvisorImpl implements ApplicationWindowAdvisor {
         }
 //		if (!config.isStatusbarVisible())
 //			win.getStatusBar().setVisible(false);
-
 
     }
 

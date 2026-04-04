@@ -26,17 +26,12 @@ import java.io.InputStream;
 import java.util.Locale;
 import java.util.Properties;
 
-import com.formdev.flatlaf.FlatDarculaLaf;
-import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
-import com.jgoodies.looks.plastic.theme.SkyBluer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pmedv.core.app.AbstractApplication;
 import com.formdev.flatlaf.util.SystemInfo;
-import org.pmedv.core.preferences.Preferences;
 
 import javax.swing.*;
-import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
 
 /**
