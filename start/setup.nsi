@@ -5,7 +5,7 @@ Name "BlackBoard"
 
 # General Symbol Definitions
 !define REGKEY "SOFTWARE\$(^Name)"
-!define VERSION 2.0.0.5
+!define VERSION 2.0.0.7
 !define COMPANY "Matthias Pueski"
 !define URL http://blackboard.serverpool.org
 
