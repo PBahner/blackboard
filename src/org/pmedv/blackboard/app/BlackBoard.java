@@ -86,6 +86,16 @@ public class BlackBoard extends AbstractApplication {
 		if (!p.getProperty("language").equalsIgnoreCase("default")){
 			Locale.setDefault(new Locale(p.getProperty("language")));
 		}
+
+		// SwingX LinuxLookAndFeelAddons calls UIManager.put during class init.
+		// InfoNode listens to those changes; on GNOME that happens while PaneUI
+		// is still constructing and crashes with a null listener. Initialize
+		// SwingX addons before Spring loads InfoNode.
+		try {
+			Class.forName("org.jdesktop.swingx.plaf.LookAndFeelAddons");
+		}
+		catch (ClassNotFoundException ignored) {
+		}
 		
 		log.info("Initalizing application");		
 		BlackBoard app = new BlackBoard(fileName);
