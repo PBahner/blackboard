@@ -102,8 +102,11 @@ public class IOUtils {
 	public static File unpackBoard(File file) throws Exception {
 		File tempDir = new File(System.getProperty("java.io.tmpdir") + "/blackboard/", file.getName());
 		log.info("Temp directory is at : " + tempDir.getAbsolutePath());
-		if (!tempDir.exists()) {
-			tempDir.mkdir();
+		if (tempDir.exists()) {
+			FileUtils.deleteDirectory(tempDir);
+		}
+		if (!tempDir.mkdirs()) {
+			throw new IOException("Could not create temp directory " + tempDir.getAbsolutePath());
 		}
 		ZipUtils.extractZipArchive(file.getAbsolutePath(), tempDir.getAbsolutePath());
 		File tempPartDir = new File(tempDir, "parts");
@@ -156,15 +159,20 @@ public class IOUtils {
 			}
 		}
 		
+		File expectedBoardXml = new File(tempDir, file.getName() + ".xml");
+		if (expectedBoardXml.isFile()) {
+			return expectedBoardXml;
+		}
 		File[] files = tempDir.listFiles();
-        for (File f: files) {
-			String filename = f.getName();
-			boolean isDirectChild = !filename.contains("/") && !filename.contains("\\");
-			if (isDirectChild && filename.endsWith("xml")) {
-				return f;
+		if (files != null) {
+			for (File f : files) {
+				String filename = f.getName();
+				boolean isDirectChild = f.isFile() && !filename.contains("/") && !filename.contains("\\");
+				if (isDirectChild && filename.toLowerCase().endsWith(".xml")) {
+					return f;
+				}
 			}
 		}
-		
 		return null;
 	}
 
