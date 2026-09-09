@@ -24,8 +24,13 @@ package org.pmedv.core.dialogs;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GraphicsEnvironment;
+import java.awt.Insets;
+import java.awt.Rectangle;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -202,6 +207,7 @@ public abstract class AbstractNiceDialog extends JDialog {
 	private JPanel createButtonBar(boolean showNewButton, boolean showOkButton, boolean showCancelButton) {
 		
 		buttonPanel = new JPanel(new FlowLayout());
+		buttonPanel.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
 
 		if (showNewButton) {
 			newButton = new JButton(resources.getResourceByKey("button.new"));
@@ -223,7 +229,52 @@ public abstract class AbstractNiceDialog extends JDialog {
 	}
 	
 	private void centerAndAdjustSize() {
-		setLocationRelativeTo(getRootPane());		
+		sizeToFitContents();
+		Window owner = getOwner();
+		setLocationRelativeTo(owner != null ? owner : win);
+	}
+
+	/**
+	 * Grows the dialog height so header, content, buttons and window decorations fit.
+	 * Width stays at the size set by the subclass.
+	 */
+	protected void sizeToFitContents() {
+		if (!isDisplayable()) {
+			addNotify();
+		}
+		validate();
+
+		Dimension requested = getSize();
+		Dimension preferred = getPreferredSize();
+		Insets insets = getInsets();
+
+		int width = requested.width > 1 ? requested.width : preferred.width;
+		int height = Math.max(requested.height, preferred.height);
+		if (insets.top == 0) {
+			height += 40;
+		}
+
+		Rectangle screen = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+		if (screen != null) {
+			if (width > 1) {
+				width = Math.min(width, screen.width);
+			}
+			height = Math.min(Math.max(height, 1), screen.height);
+		}
+
+		if (width > 0 && height > 0) {
+			setSize(width, height);
+		}
+	}
+
+	@Override
+	public void setVisible(boolean visible) {
+		if (visible) {
+			sizeToFitContents();
+			Window owner = getOwner();
+			setLocationRelativeTo(owner != null ? owner : win);
+		}
+		super.setVisible(visible);
 	}
 
 	/* (non-Javadoc)

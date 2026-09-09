@@ -25,7 +25,6 @@ package org.pmedv.blackboard.dialogs;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -74,6 +73,7 @@ public class BoardPropertiesDialog extends AbstractNiceDialog {
 		propertiesPanel = new BoardPropertiesPanel();
 		propertiesPanel.getFileField().getFileChooser().setFileFilter(new PNGFilter());
 		setResizable(false);
+		setSize(new Dimension(DIALOG_WIDTH, 1));
 		getContentPanel().add(propertiesPanel, BorderLayout.CENTER);
 		propertiesPanel.getTypeCombo().setRenderer(new BoardTypeComboBoxRenderer());
 		propertiesPanel.getFileField().setEnabled(false);
@@ -88,38 +88,7 @@ public class BoardPropertiesDialog extends AbstractNiceDialog {
 			}
 		}
 
-		sizeDialogToContents();
 		initListeners();
-	}
-
-	private void sizeDialogToContents() {
-		if (!isDisplayable()) {
-			addNotify();
-		}
-
-		int headerHeight = 0;
-		int buttonHeight = 0;
-		BorderLayout layout = (BorderLayout) getContentPanel().getLayout();
-		for (Component component : getContentPanel().getComponents()) {
-			Object constraint = layout.getConstraints(component);
-			if (BorderLayout.NORTH.equals(constraint)) {
-				headerHeight = component.getPreferredSize().height;
-			}
-			else if (BorderLayout.SOUTH.equals(constraint)) {
-				buttonHeight = component.getPreferredSize().height;
-			}
-		}
-
-		Dimension formSize = propertiesPanel.getPreferredSize();
-		Insets insets = getInsets();
-		int insetTop = insets.top > 0 ? insets.top : 32;
-		int insetBottom = insets.bottom > 0 ? insets.bottom : 8;
-		int insetLeft = insets.left > 0 ? insets.left : 8;
-		int insetRight = insets.right > 0 ? insets.right : 8;
-		int width = Math.max(DIALOG_WIDTH, formSize.width + insetLeft + insetRight);
-		int height = headerHeight + formSize.height + buttonHeight + insetTop + insetBottom;
-		setSize(new Dimension(width, height));
-		setMinimumSize(getSize());
 	}
 
 	private void initListeners() {
