@@ -26,7 +26,9 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.xml.bind.JAXBContext;
@@ -93,6 +95,7 @@ public class IOUtils {
 		
 		try {
 			partMarshaller = (Marshaller) JAXBContext.newInstance(Part.class).createMarshaller();
+			partMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 		}
 		catch (JAXBException e) {
 			throw new RuntimeException("Unable to create unmarshaller for "+Part.class);
@@ -117,49 +120,21 @@ public class IOUtils {
 		File partDir = new File(workDir, "parts");
 		File imageDir = new File(partDir, "images");
 		
+		File boardXml = findBoardXml(tempDir, file);
 		if (tempPartDir.exists()) {
-			for (int i = 0; i < tempPartDir.listFiles().length; i++) {
-				File outputPart = new File(partDir, tempPartDir.listFiles()[i].getName());
-				if (outputPart.getName().endsWith(".xml")) {
-					try {
-						if (!outputPart.exists()) {
-							FileUtils.copyFile(tempPartDir.listFiles()[i], outputPart);
-							Part p = (Part) partUnmarshaller.unmarshal(new FileInputStream(tempPartDir.listFiles()[i]));
-							FileUtils.copyFile(new File(tempImagesDir, p.getImageName()), new File(imageDir, p.getImageName()));
-							AppContext.getContext().getBean(PartFactory.class).addPart(outputPart.getName());
-						}
-// TODO : This is a real big mess here, if we do it like that, each time a board is opened, the parts which are contained in 
-// 		  the file will be created and we get lots of duplicates. Notice to myself : Do not program while sitting in a train!
-//						else {
-//							// houston we got a problem, there's already a file with the same name, it might be the same
-//							// part or not. No matter what, we cannot be sure and we need to give the file a new name						
-//							// to be absolutely sure, we need a unique name, we just add the time add the beginning of the filename							
-//							String timestamp = String.valueOf(System.currentTimeMillis());													
-//							// copy the file with a new name
-//							String partName = timestamp + tempPartDir.listFiles()[i].getName();
-//							File newOutput = new File(partDir,partName);
-//							FileUtils.copyFile(tempPartDir.listFiles()[i], newOutput);
-//							// get the part
-//							Part p = (Part) partUnmarshaller.unmarshal(new FileInputStream(newOutput));
-//							// if a part with a new name exists the image probably is also the same, wo we need a new name for it too
-//							String newImageName = timestamp + p.getImageName();
-//							FileUtils.copyFile(new File(tempImagesDir, p.getImageName()), new File(imageDir, newImageName));
-//							p.setImageName(newImageName);
-//							// persist the changes 
-//							partMarshaller.marshal(p, newOutput);
-//							// and finally add the part to the PartFactory
-//							AppContext.getContext().getBean(PartFactory.class).addPart(partName);
-//						}
-						
-					}
-					catch (Exception e) {
-						throw(e);
-					}
-				}
+			if (!imageDir.exists() && !imageDir.mkdirs()) {
+				throw new IOException("Could not create image directory " + imageDir.getAbsolutePath());
+			}
+			Map<String, String> partFilenameRemap = importPackedParts(tempPartDir, tempImagesDir, partDir, imageDir);
+			if (boardXml != null && !partFilenameRemap.isEmpty()) {
+				replacePartFilenamesInUnpackedBoardXml(boardXml, partFilenameRemap);
 			}
 		}
-		
-		File expectedBoardXml = new File(tempDir, file.getName() + ".xml");
+		return boardXml;
+	}
+
+	private static File findBoardXml(File tempDir, File packedFile) {
+		File expectedBoardXml = new File(tempDir, packedFile.getName() + ".xml");
 		if (expectedBoardXml.isFile()) {
 			return expectedBoardXml;
 		}
@@ -174,6 +149,142 @@ public class IOUtils {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Copies packed parts into the local library. Existing files with the same
+	 * content are left alone; colliding names with different content get a unique
+	 * filename. Returns a map of original XML names to the names actually used.
+	 */
+	private static Map<String, String> importPackedParts(File tempPartDir, File tempImagesDir, File partDir, File imageDir) throws Exception {
+		Map<String, String> filenameRemap = new HashMap<String, String>();
+		File[] packedFiles = tempPartDir.listFiles();
+		if (packedFiles == null) {
+			return filenameRemap;
+		}
+		PartFactory partFactory = AppContext.getContext().getBean(PartFactory.class);
+		for (File packedFile : packedFiles) {
+			if (!packedFile.isFile() || !packedFile.getName().toLowerCase().endsWith(".xml")) {
+				continue;
+			}
+			String originalName = packedFile.getName();
+			File localFile = new File(partDir, originalName);
+			if (localFile.exists() && FileUtils.contentEquals(localFile, packedFile)) {
+				continue;
+			}
+			String destXmlName = originalName;
+			if (localFile.exists()) {
+				File destXml = findNumberedCopyOrUnusedName(partDir, originalName, packedFile);
+				destXmlName = destXml.getName();
+				if (destXml.exists()) {
+					if (partFactory.getPart(destXmlName) == null) {
+						partFactory.addPart(destXmlName);
+					}
+					filenameRemap.put(originalName, destXmlName);
+					continue;
+				}
+				log.info("Part filename collision for " + originalName + ", importing as " + destXmlName);
+			}
+			Part packedPart = unmarshalPart(packedFile);
+			copyPackedPartIntoLibrary(packedFile, packedPart, destXmlName, tempImagesDir, partDir, imageDir, partFactory);
+			if (!destXmlName.equals(originalName)) {
+				filenameRemap.put(originalName, destXmlName);
+			}
+		}
+		return filenameRemap;
+	}
+
+	/**
+	 * Copies a packed part XML and its image into the local parts library.
+	 * {@code destXmlName} is already resolved; this only unique-names the image
+	 * if that filename is taken by a different file.
+	 */
+	private static void copyPackedPartIntoLibrary(File packedXml, Part packedPart, String destXmlName,
+			File tempImagesDir, File partDir, File imageDir, PartFactory partFactory) throws Exception {
+		boolean imageNameChanged = false;
+		String imageName = packedPart.getImageName();
+		if (imageName != null) {
+			File packedImage = new File(tempImagesDir, imageName);
+			if (packedImage.isFile()) {
+				File destImage = new File(imageDir, imageName);
+				if (destImage.exists() && !FileUtils.contentEquals(destImage, packedImage)) {
+					destImage = findNumberedCopyOrUnusedName(imageDir, imageName, packedImage);
+					packedPart.setImageName(destImage.getName());
+					imageNameChanged = true;
+				}
+				if (!destImage.exists()) {
+					FileUtils.copyFile(packedImage, destImage);
+				}
+			}
+		}
+		File destXml = new File(partDir, destXmlName);
+		if (imageNameChanged) {
+			partMarshaller.marshal(packedPart, destXml);
+		}
+		else {
+			FileUtils.copyFile(packedXml, destXml);
+		}
+		partFactory.addPart(destXmlName);
+	}
+
+	/**
+	 * For a colliding name like {@code foo.xml}, checks {@code foo_1.xml},
+	 * {@code foo_2.xml}, ... in order. Returns an existing numbered copy whose
+	 * bytes match {@code content}, or the first numbered name that is still unused.
+	 */
+	private static File findNumberedCopyOrUnusedName(File dir, String filename, File content) throws IOException {
+		int dot = filename.lastIndexOf('.');
+		String base = dot > 0 ? filename.substring(0, dot) : filename;
+		String ext = dot > 0 ? filename.substring(dot) : "";
+		int n = 1;
+		while (true) {
+			File candidate = new File(dir, base + "_" + n + ext);
+			if (!candidate.exists()) {
+				return candidate;
+			}
+			if (content != null && FileUtils.contentEquals(candidate, content)) {
+				return candidate;
+			}
+			n++;
+		}
+	}
+
+	private static Part unmarshalPart(File file) throws Exception {
+		FileInputStream fis = new FileInputStream(file);
+		try {
+			return (Part) partUnmarshaller.unmarshal(fis);
+		}
+		finally {
+			fis.close();
+		}
+	}
+
+	/**
+	 * Packed boards still name parts as they were stored in the zip
+	 * (e.g. {@code foo.xml}). After a filename collision the library copy is
+	 * {@code foo_1.xml}; this rewrites those references in the unpacked board
+	 * XML so {@code openBoard} loads the imported files.
+	 */
+	private static void replacePartFilenamesInUnpackedBoardXml(File boardXml, Map<String, String> packedNameToLibraryName) throws Exception {
+		Unmarshaller u = JAXBContext.newInstance(BoardBean.class).createUnmarshaller();
+		BoardBean board = (BoardBean) u.unmarshal(boardXml);
+		if (board == null || board.getParts() == null) {
+			return;
+		}
+		boolean changed = false;
+		for (PartBean partBean : board.getParts()) {
+			String libraryName = packedNameToLibraryName.get(partBean.getFilename());
+			if (libraryName != null) {
+				partBean.setFilename(libraryName);
+				changed = true;
+			}
+		}
+		if (!changed) {
+			return;
+		}
+		Marshaller m = JAXBContext.newInstance(BoardBean.class).createMarshaller();
+		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+		m.marshal(board, boardXml);
 	}
 
 	/**
@@ -256,10 +367,10 @@ public class IOUtils {
 				model.getLayer(p.getLayer()).getItems().add(p);
 			}
 			for (PartBean partBean : board.getParts()) {
-				Part part = (Part) AppContext.getContext().getBean(PartFactory.class).getPart(partBean.getFilename()).clone();
-				// part does not exist -> proceed
-				if (part == null)
+				Part template = AppContext.getContext().getBean(PartFactory.class).getPart(partBean.getFilename());
+				if (template == null)
 					continue;
+				Part part = (Part) template.clone();
 				part.setXLoc(partBean.getXLoc());
 				part.setYLoc(partBean.getYLoc());
 				part.setOldXLoc(part.getXLoc());
