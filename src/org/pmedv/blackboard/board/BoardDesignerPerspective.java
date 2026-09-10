@@ -517,7 +517,7 @@ public class BoardDesignerPerspective extends AbstractPerspective implements IMe
 	@Override
 	public void loadState() {
 
-		String dir = System.getProperty("user.home") + "/." + AppContext.getName() + "/";
+		String dir = AppContext.getUserDataDir().getAbsolutePath() + "/";
 
 		try {
 			final Unmarshaller u = (Unmarshaller) JAXBContext.newInstance(FileList.class).createUnmarshaller();
@@ -563,7 +563,7 @@ public class BoardDesignerPerspective extends AbstractPerspective implements IMe
 	@Override
 	public void saveState() {
 
-		String dir = System.getProperty("user.home") + "/." + AppContext.getName() + "/";
+		String dir = AppContext.getUserDataDir().getAbsolutePath() + "/";
 
 		FileList files = new FileList();
 

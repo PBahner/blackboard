@@ -222,7 +222,7 @@ public class ApplicationMenuBarProviderImpl implements ApplicationMenuBarProvide
 					
 					try {
 						
-						String inputDir = System.getProperty("user.home") + "/."+AppContext.getName()+"/";
+						String inputDir = AppContext.getUserDataDir().getAbsolutePath() + "/";
 						String inputFileName = "recentFiles.xml";			
 						File inputFile = new File(inputDir+inputFileName);
 						

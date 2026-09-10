@@ -82,7 +82,7 @@ public class Preferences {
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static void load() {
-		String prefsFileLocation = System.getProperty("user.home") + "/." + AppContext.getName() + "/preferences.xml";
+		String prefsFileLocation = new File(AppContext.getUserDataDir(), "preferences.xml").getAbsolutePath();
 		File prefsFile = new File(prefsFileLocation);
 
 		// No preferences file found: Write defaults and store preferences.
@@ -112,7 +112,7 @@ public class Preferences {
 	 */
 	public static void store() {
 
-		String prefsFile = System.getProperty("user.home") + "/." + AppContext.getName() + "/preferences.xml";
+		String prefsFile = new File(AppContext.getUserDataDir(), "preferences.xml").getAbsolutePath();
 
 		XMLEncoder enc;
 

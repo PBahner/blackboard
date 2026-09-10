@@ -29,6 +29,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pmedv.core.app.AbstractApplication;
+import org.pmedv.core.context.AppContext;
 import com.formdev.flatlaf.util.SystemInfo;
 
 import javax.swing.*;
@@ -44,6 +45,11 @@ public class BlackBoard extends AbstractApplication {
 
 	public BlackBoard(String fileLocation) {
 		super(fileLocation);
+	}
+
+	@Override
+	protected String[] getBundledDataDirectories() {
+		return new String[] { "parts", "symbols", "models", "datasheets", "simulators" };
 	}
 
 	private static final Log log = LogFactory.getLog(BlackBoard.class);
@@ -78,11 +84,11 @@ public class BlackBoard extends AbstractApplication {
 			}						
 		}
 		
-		InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("application.properties");
-		
 		Properties p = new Properties();
-		p.load(is);
-		
+		try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("application.properties")) {
+			p.load(is);
+		}
+		AppContext.setName(p.getProperty("app.name"));
 		if (!p.getProperty("language").equalsIgnoreCase("default")){
 			Locale.setDefault(new Locale(p.getProperty("language")));
 		}

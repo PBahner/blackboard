@@ -212,9 +212,12 @@ public class ConvertToPartCommand extends AbstractEditorCommand {
 			
 		// now store the rendered image to the parts/images directory
 		
-		File workDir = new File(".");
-		File partDir = new File(workDir + "/parts/");
-		File imageDir = new File(workDir + "/parts/images/");
+		File workDir = AppContext.getCatalogDir();
+		File partDir = new File(workDir, "parts");
+		File imageDir = new File(partDir, "images");
+		if (!imageDir.exists()) {
+			imageDir.mkdirs();
+		}
 		File outputImage = new File(imageDir+"/"+partName+".png");
 		File outputPart = new File(partDir+"/"+partName+".xml");
 		

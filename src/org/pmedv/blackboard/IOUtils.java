@@ -115,7 +115,7 @@ public class IOUtils {
 		File tempPartDir = new File(tempDir, "parts");
 		File tempImagesDir = new File(tempPartDir, "images");
 		
-		File workDir = new File(System.getProperty("user.home"),"."+AppContext.getName());
+		File workDir = AppContext.getCatalogDir();
 		log.info("Working directory " + workDir.getAbsolutePath());		
 		File partDir = new File(workDir, "parts");
 		File imageDir = new File(partDir, "images");
@@ -447,7 +447,7 @@ public class IOUtils {
 	public static synchronized void updateRecentFiles(String filename) {
 		RecentFileList fileList = null;
 		try {
-			String inputDir = System.getProperty("user.home") + "/." + AppContext.getName() + "/";
+			String inputDir = AppContext.getUserDataDir().getAbsolutePath() + "/";
 			String inputFileName = "recentFiles.xml";
 			File inputFile = new File(inputDir + inputFileName);
 			if (inputFile.exists()) {
@@ -468,7 +468,7 @@ public class IOUtils {
 			fileList.getRecentFiles().add(filename);
 		Marshaller m;
 		try {
-			String outputDir = System.getProperty("user.home") + "/." + AppContext.getName() + "/";
+			String outputDir = AppContext.getUserDataDir().getAbsolutePath() + "/";
 			String outputFileName = "recentFiles.xml";
 			m = JAXBContext.newInstance(RecentFileList.class).createMarshaller();
 			m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
@@ -610,9 +610,9 @@ public class IOUtils {
 				else if (item instanceof Part && !(item instanceof TextPart) && !(item instanceof Box)
 						&& !(item instanceof Ellipse) && !(item instanceof Symbol)) {
 					Part part = (Part) item;
-					FileUtils.copyFile(new File(System.getProperty("user.home") + "/." + AppContext.getName() + "/parts/" + part.getFilename()), new File(
+					FileUtils.copyFile(new File(AppContext.getCatalogDir(), "parts/" + part.getFilename()), new File(
 							tempPartDir, part.getFilename()), true);
-					FileUtils.copyFile(new File(System.getProperty("user.home") + "/." + AppContext.getName() + "/parts/images/" + part.getImageName()), new File(
+					FileUtils.copyFile(new File(AppContext.getCatalogDir(), "parts/images/" + part.getImageName()), new File(
 							tempImagesDir, part.getImageName()), true);
 					PartBean pb = new PartBean(part);
 					board.getParts().add(pb);
