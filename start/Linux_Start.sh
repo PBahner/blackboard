@@ -6,4 +6,4 @@ then
   cd $RELATIVEDIR
 fi
 
-java -Dsun.java2d.opengl=true -jar BlackBoard.jar
+java -jar BlackBoard.jar
