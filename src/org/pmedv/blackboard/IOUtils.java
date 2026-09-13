@@ -330,6 +330,7 @@ public class IOUtils {
 			}
 			if (board.getLayers().size() == 0)
 				model.addDefaultLayers();
+			model.ensureCurrentLayer();
 			if (board.getType() != null && board.getType().equals(BoardType.CUSTOM)) {
 				String name = file.getName().substring(0, file.getName().lastIndexOf("."));
 				tempDir = new File(System.getProperty("java.io.tmpdir")+"/blackboard/", name);
@@ -345,7 +346,7 @@ public class IOUtils {
 			}
 			for (LineBean lineBean : board.getLines()) {
 				Line line = new Line(lineBean);
-				model.getLayer(line.getLayer()).getItems().add(line);
+				model.addItem(line, line.getLayer());
 			}
 			for (TextPartBean textBean : board.getTextParts()) {
 				Font f = new Font(textBean.getFont(), Font.PLAIN, textBean.getFontsize());
@@ -364,7 +365,7 @@ public class IOUtils {
 				for (int i = 0; i < ninetyDegreeSteps; i++)
 					p.rotateCW();
 				p.setRotation(textBean.getRotation());
-				model.getLayer(p.getLayer()).getItems().add(p);
+				model.addItem(p, p.getLayer());
 			}
 			for (PartBean partBean : board.getParts()) {
 				Part template = AppContext.getContext().getBean(PartFactory.class).getPart(partBean.getFilename());
@@ -394,29 +395,29 @@ public class IOUtils {
 				}				
 				
 				part.setRotation(partBean.getRotation());
-				model.getLayer(part.getLayer()).getItems().add(part);
+				model.addItem(part, part.getLayer());
 			}
 			for (ResistorBean resistorBean : board.getResistors()) {
 				Resistor resistor = new Resistor(resistorBean);
-				model.getLayer(resistor.getLayer()).getItems().add(resistor);
+				model.addItem(resistor, resistor.getLayer());
 				resistor.setIndex(resistorBean.getIndex());
 			}
 			for (DiodeBean diodeBean : board.getDiodes()) {
 				Diode diode = new Diode(diodeBean);
-				model.getLayer(diode.getLayer()).getItems().add(diode);
+				model.addItem(diode, diode.getLayer());
 				diode.setIndex(diodeBean.getIndex());
 			}
 			for (BoxBean bb : board.getBoxes()) {
 				Box box = new Box(bb);
-				model.getLayer(box.getLayer()).getItems().add(box);
+				model.addItem(box, box.getLayer());
 			}
 			for (EllipseBean eb : board.getEllipses()) {
 				Ellipse ellipse = new Ellipse(eb);
-				model.getLayer(ellipse.getLayer()).getItems().add(ellipse);
+				model.addItem(ellipse, ellipse.getLayer());
 			}
 			for (SymbolBean sb : board.getSymbols()) {				
 				Symbol symbol = new Symbol(sb);
-				model.getLayer(sb.getLayer()).getItems().add(symbol);								
+				model.addItem(symbol, sb.getLayer());								
 			}
 		}
 		catch (Exception i) {

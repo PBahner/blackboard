@@ -293,7 +293,7 @@ public class ConvertToPartCommand extends AbstractEditorCommand {
 			newPart.setXLoc(min_x);
 			newPart.setYLoc(min_y);
 			
-			editor.getModel().getCurrentLayer().getItems().add(newPart);
+			editor.getModel().addItem(newPart);
 			editor.setSelectedItem(newPart);
 			editor.refresh();
 		}

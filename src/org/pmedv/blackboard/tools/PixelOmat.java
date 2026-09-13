@@ -411,7 +411,7 @@ public class PixelOmat extends JFrame {
 		newPart.setXLoc(32);
 		newPart.setYLoc(32);
 		
-		editor.getModel().getCurrentLayer().getItems().add(newPart);
+		editor.getModel().addItem(newPart);
 		editor.setSelectedItem(newPart);
 		editor.refresh();
 		

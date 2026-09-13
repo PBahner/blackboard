@@ -75,6 +75,8 @@ public class DeleteLayerCommand extends AbstractCommand {
 				layerPanel.getLayerModel().removeLayer(current);
 				editor.getModel().getLayers().remove(current);
 			}
+
+			editor.getModel().ensureCurrentLayer();
 			
 			editor.updateStatusBar();
 			editor.notifyListeners(EventType.EDITOR_CHANGED);
