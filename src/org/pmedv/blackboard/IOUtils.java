@@ -27,8 +27,10 @@ import java.awt.Font;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 import javax.xml.bind.JAXBContext;
@@ -125,7 +127,8 @@ public class IOUtils {
 			if (!imageDir.exists() && !imageDir.mkdirs()) {
 				throw new IOException("Could not create image directory " + imageDir.getAbsolutePath());
 			}
-			Map<String, String> partFilenameRemap = importPackedParts(tempPartDir, tempImagesDir, partDir, imageDir);
+			Set<String> usedPartFiles = collectUsedPartFilenames(boardXml);
+			Map<String, String> partFilenameRemap = importPackedParts(tempPartDir, tempImagesDir, partDir, imageDir, usedPartFiles);
 			if (boardXml != null && !partFilenameRemap.isEmpty()) {
 				replacePartFilenamesInUnpackedBoardXml(boardXml, partFilenameRemap);
 			}
@@ -156,7 +159,7 @@ public class IOUtils {
 	 * content are left alone; colliding names with different content get a unique
 	 * filename. Returns a map of original XML names to the names actually used.
 	 */
-	private static Map<String, String> importPackedParts(File tempPartDir, File tempImagesDir, File partDir, File imageDir) throws Exception {
+	private static Map<String, String> importPackedParts(File tempPartDir, File tempImagesDir, File partDir, File imageDir, Set<String> usedPartFiles) throws Exception {
 		Map<String, String> filenameRemap = new HashMap<String, String>();
 		File[] packedFiles = tempPartDir.listFiles();
 		if (packedFiles == null) {
@@ -168,6 +171,10 @@ public class IOUtils {
 				continue;
 			}
 			String originalName = packedFile.getName();
+			if (usedPartFiles != null && !usedPartFiles.contains(originalName)) {
+				log.info("Skipping packed part not used on board: " + originalName);
+				continue;
+			}
 			File localFile = new File(partDir, originalName);
 			if (localFile.exists() && FileUtils.contentEquals(localFile, packedFile)) {
 				continue;
@@ -192,6 +199,33 @@ public class IOUtils {
 			}
 		}
 		return filenameRemap;
+	}
+
+	/**
+	 * Filenames of library parts still placed on the board. {@code null} means
+	 * the board XML could not be read and packed parts should not be filtered.
+	 */
+	private static Set<String> collectUsedPartFilenames(File boardXml) {
+		if (boardXml == null || !boardXml.isFile()) {
+			return null;
+		}
+		try {
+			Unmarshaller u = JAXBContext.newInstance(BoardBean.class).createUnmarshaller();
+			BoardBean board = (BoardBean) u.unmarshal(boardXml);
+			Set<String> names = new HashSet<String>();
+			if (board != null && board.getParts() != null) {
+				for (PartBean partBean : board.getParts()) {
+					if (partBean.getFilename() != null && partBean.getFilename().length() > 0) {
+						names.add(partBean.getFilename());
+					}
+				}
+			}
+			return names;
+		}
+		catch (Exception e) {
+			log.warn("Could not read packed board parts list, importing all packed parts.");
+			return null;
+		}
 	}
 
 	/**
@@ -566,27 +600,26 @@ public class IOUtils {
 	 */
 	public static boolean savePackedBoard(File file, BoardEditorModel model) throws IOException {
 
-		File tempDir = new File(System.getProperty("java.io.tmpdir"),"blackboard");
-		
-		if (!tempDir.exists()) {
-			if (!tempDir.mkdir()) {
-				throw new IOException("Could not create temp directory, try to create it manually ("+tempDir.getAbsolutePath()+")");
-			}
+		File blackboardTemp = new File(System.getProperty("java.io.tmpdir"), "blackboard");
+		if (!blackboardTemp.exists() && !blackboardTemp.mkdir()) {
+			throw new IOException("Could not create temp directory, try to create it manually ("+blackboardTemp.getAbsolutePath()+")");
 		}
 
-		tempDir = new File(System.getProperty("java.io.tmpdir")+"/blackboard/",file.getName());
-		if (!tempDir.exists()) {
-			if (!tempDir.mkdir()) {
-				throw new IOException("Could not create temp directory, try to create it manually ("+tempDir.getAbsolutePath()+")");
-			}
+		File tempDir = new File(blackboardTemp, file.getName());
+		if (tempDir.exists()) {
+			FileUtils.deleteDirectory(tempDir);
+		}
+		if (!tempDir.mkdirs()) {
+			throw new IOException("Could not create temp directory, try to create it manually ("+tempDir.getAbsolutePath()+")");
 		}
 		File tempPartDir = new File(tempDir, "parts");
-		if (!tempPartDir.exists()) {
-			tempPartDir.mkdir();
+		if (!tempPartDir.mkdir()) {
+			throw new IOException("Could not create temp parts directory ("+tempPartDir.getAbsolutePath()+")");
 		}
 		File tempImagesDir = new File(tempPartDir, "images");
-		if (!tempImagesDir.exists())
-			tempImagesDir.mkdir();
+		if (!tempImagesDir.mkdir()) {
+			throw new IOException("Could not create temp images directory ("+tempImagesDir.getAbsolutePath()+")");
+		}
 		File tempXMLFile = new File(tempDir, file.getName() + ".xml");
 		BoardBean board = new BoardBean();
 		board.setWidth(model.getWidth());
