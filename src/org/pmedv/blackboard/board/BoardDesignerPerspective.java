@@ -203,9 +203,7 @@ public class BoardDesignerPerspective extends AbstractPerspective implements IMe
 		 taskpanecontainer.add(shapePane);
 		 **/
 
-		ctx.getBean(ShapePropertiesPanel.class).getStartLineCombo().setSelectedItem(LineEdgeType.STRAIGHT);
-		ctx.getBean(ShapePropertiesPanel.class).getEndLineCombo().setSelectedItem(LineEdgeType.STRAIGHT);
-		ctx.getBean(ShapePropertiesPanel.class).getThicknessCombo().setSelectedItem(new BasicStroke(2.0f));
+		ctx.getBean(ShapePropertiesPanel.class).applyDefaultLineStyle();
 
 		/**
 		 JXTaskPane layerPane = new JXTaskPane();

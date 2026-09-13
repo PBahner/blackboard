@@ -1865,7 +1865,7 @@ public class BoardEditor extends JPanel implements MouseMotionListener{
 				if (line.getStroke() != null)
 					g2d.setStroke(line.getStroke());
 				else
-					g2d.setStroke(BoardUtil.stroke_3_0f);
+					g2d.setStroke(BoardUtil.getDefaultStroke());
 				g2d.setColor(item.getColor());
 			}
 			
