@@ -246,10 +246,9 @@ public class EditorUtils {
 	}
 
 	/**
-	 * gets all {@link View} objects for a given {@link AbstractPerspective}
-	 * 
+	 * Gets all {@link View} objects for a given {@link AbstractPerspective}
+	 *
 	 * @param a the perspective to get the views for
-	 * 
 	 * @return a list of {@link View} objects.
 	 */
 	public static ArrayList<View> getCurrentPerspectiveViews(AbstractPerspective a) {

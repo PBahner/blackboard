@@ -105,6 +105,8 @@ import org.pmedv.core.provider.ApplicationWindowConfigurationProvider;
 import org.pmedv.core.services.ResourceService;
 import org.springframework.context.ApplicationContext;
 
+import com.formdev.flatlaf.util.UIScale;
+
 public class BoardDesignerPerspective extends AbstractPerspective implements IMemento {
 
 	private static final long serialVersionUID = -200105829758192919L;
@@ -233,7 +235,8 @@ public class BoardDesignerPerspective extends AbstractPerspective implements IMe
 		}
 
 		horizontalSplitPane.setOneTouchExpandable(true);
-		horizontalSplitPane.setDividerSize(10);
+		horizontalSplitPane.setDividerSize(UIScale.scale(10));
+		toolTabPane.setMinimumSize(new Dimension(UIScale.scale(260), 0));
 
 		toolTabPane.addTab(resources.getResourceByKey("tooltab.forms"),resources.getIcon("icon.paint"), scrollPane);
 
@@ -343,7 +346,24 @@ public class BoardDesignerPerspective extends AbstractPerspective implements IMe
 		ctx.getBean(ShapePropertiesPanel.class).getStartAngleSpinner().setEnabled(false);
 
 		initListeners();
+		SwingUtilities.invokeLater(this::applyToolSplitLocation);
 
+	}
+
+	private void applyToolSplitLocation() {
+		int minTools = Math.max(UIScale.scale(260), toolTabPane.getPreferredSize().width);
+		int saved = configProvider.getConfig().getDividerLocation();
+		String position = (String) Preferences.values.get("org.pmedv.blackboard.BoardDesignerPerspective.layerPanelPlacement");
+		if ("left".equalsIgnoreCase(position)) {
+			horizontalSplitPane.setDividerLocation(Math.max(saved, minTools));
+			return;
+		}
+		int total = horizontalSplitPane.getWidth();
+		if (total <= 0) {
+			return;
+		}
+		int loc = saved > 0 ? saved : total - minTools;
+		horizontalSplitPane.setDividerLocation(Math.max(50, Math.min(loc, total - minTools)));
 	}
 
 	private void initListeners() {
@@ -549,7 +569,7 @@ public class BoardDesignerPerspective extends AbstractPerspective implements IMe
 
 			}
 
-			horizontalSplitPane.setDividerLocation(configProvider.getConfig().getDividerLocation());
+			applyToolSplitLocation();
 
 		}
 		catch (Exception e) {

@@ -132,7 +132,7 @@ public class CreateBoardCommand extends AbstractOpenEditorCommand {
 				// the center panel centers the editor inside the view no matter which dimensions it has
 				CenterPanel panel = new CenterPanel();
 				// go for the zoom
-				JXLayer<?> zoomLayer = TransformUtils.createTransformJXLayer(editor, 1,new QualityHints());				
+				JXLayer<?> zoomLayer = TransformUtils.createTransformJXLayer(editor, BoardEditor.visualScale(1f), new QualityHints());				
 				panel.getCenterPanel().add(zoomLayer);				
 				editor.setZoomLayer(zoomLayer);
 				panel.setBoardEditor(editor);

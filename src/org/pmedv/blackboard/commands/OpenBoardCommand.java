@@ -213,7 +213,7 @@ public class OpenBoardCommand extends AbstractOpenEditorCommand {
 		
 		final BoardEditor editor = new BoardEditor(model);
 		CenterPanel panel = new CenterPanel();
-		JXLayer<?> zoomLayer = TransformUtils.createTransformJXLayer(editor, 1,new QualityHints());				
+		JXLayer<?> zoomLayer = TransformUtils.createTransformJXLayer(editor, BoardEditor.visualScale(1f), new QualityHints());				
 		panel.getCenterPanel().add(zoomLayer);				
 		editor.setZoomLayer(zoomLayer);
 		panel.setBoardEditor(editor);

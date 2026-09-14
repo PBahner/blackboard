@@ -24,10 +24,12 @@ package org.pmedv.core.app;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.MediaTracker;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileReader;
@@ -47,6 +49,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pmedv.blackboard.Colors;
 import org.pmedv.blackboard.dialogs.PartDialog;
+import org.pmedv.core.util.UiScale;
 import org.pmedv.core.util.WindowUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
@@ -126,16 +129,17 @@ public class SplashScreen implements ApplicationContextAware, BeanPostProcessor,
 			log.error("Interrupted while waiting for splash image to load.");
 		}
 
-		int width = image.getWidth(null);
-        int height = image.getHeight(null);
-        
-        BufferedImage bimg = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        
-        Graphics2D g2d = (Graphics2D)bimg.createGraphics();
-        
-        g2d.drawImage(image, 0, 0, null);        
-        g2d.setColor(Color.WHITE);
-        g2d.setFont(new Font("Arial", Font.BOLD, 10));
+		int srcW = image.getWidth(null);
+		int srcH = image.getHeight(null);
+		int width = UiScale.px(srcW);
+		int height = UiScale.px(srcH);
+
+		BufferedImage bimg = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g2d = (Graphics2D) bimg.createGraphics();
+		g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		g2d.drawImage(image, 0, 0, width, height, null);
+		g2d.setColor(Color.WHITE);
+		g2d.setFont(new Font("Arial", Font.BOLD, UiScale.px(10)));
 		InputStream is = getClass().getClassLoader().getResourceAsStream("application.properties");
 		Properties properties = new Properties();
 		try {
@@ -160,11 +164,13 @@ public class SplashScreen implements ApplicationContextAware, BeanPostProcessor,
  
 		String buildNumber = properties.getProperty("build.number");
 		
-        g2d.drawString("Version "+version+"."+buildNumber,400,305);
-		
+		g2d.drawString("Version "+version+"."+buildNumber, UiScale.px(400), UiScale.px(305));
+		g2d.dispose();
+
 		JLabel panelImage = new JLabel(new ImageIcon(bimg));
 
 		window.getContentPane().add(panelImage);
+		progressBar.setPreferredSize(new Dimension(width, UiScale.px(16)));
 		window.getContentPane().add(progressBar, BorderLayout.SOUTH);
 		window.pack();
 		

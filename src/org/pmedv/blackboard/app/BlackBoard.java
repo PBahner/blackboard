@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pmedv.core.app.AbstractApplication;
 import org.pmedv.core.context.AppContext;
+import org.pmedv.core.util.UiScale;
 import com.formdev.flatlaf.util.SystemInfo;
 
 import javax.swing.*;
@@ -56,6 +57,8 @@ public class BlackBoard extends AbstractApplication {
 	
 	@SuppressWarnings("unused")
 	public static void main(String[] args) throws Exception {
+
+		UiScale.applyFromDesktop();
 
 		// macOS
 		if( SystemInfo.isMacOS ) {

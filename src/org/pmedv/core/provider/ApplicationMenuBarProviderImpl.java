@@ -56,6 +56,7 @@ import org.pmedv.core.components.CmdJCheckBoxMenuItem;
 import org.pmedv.core.components.JMenuWithId;
 import org.pmedv.core.context.AppContext;
 import org.pmedv.core.services.ResourceService;
+import org.pmedv.core.util.UiScale;
 import org.springframework.context.ApplicationContext;
 
 
@@ -144,7 +145,7 @@ public class ApplicationMenuBarProviderImpl implements ApplicationMenuBarProvide
 										is = getClass().getClassLoader().getResourceAsStream("icons/noresource_16x16.png");
 									}
 									
-									icon = new ImageIcon(ImageIO.read(is));
+									icon = UiScale.icon(new ImageIcon(ImageIO.read(is)));
 
 								}
 								if (currentItem.getMnemonic() != null) {
@@ -290,14 +291,14 @@ public class ApplicationMenuBarProviderImpl implements ApplicationMenuBarProvide
 					InputStream is = getClass().getClassLoader().getResourceAsStream(perspective.getPerspectiveIcon());												 
 					
 					if (is != null) {
-						icon = new ImageIcon(ImageIO.read(is));	
+						icon = UiScale.icon(new ImageIcon(ImageIO.read(is)));	
 					}
 					else {
 						
 						is = getClass().getClassLoader().getResourceAsStream("icons/noresource_16x16.png");
 
 						if (is != null)
-							icon = new ImageIcon(ImageIO.read(is));
+							icon = UiScale.icon(new ImageIcon(ImageIO.read(is)));
 						
 					}
 					
@@ -369,7 +370,7 @@ public class ApplicationMenuBarProviderImpl implements ApplicationMenuBarProvide
 									if (currentItem.getImageIcon() != null) {
 										
 										InputStream is = getClass().getClassLoader().getResourceAsStream(currentItem.getImageIcon());												 
-										pIcon = new ImageIcon(ImageIO.read(is));
+										pIcon = UiScale.icon(new ImageIcon(ImageIO.read(is)));
 
 									}
 									if (currentItem.getMnemonic() != null) {
