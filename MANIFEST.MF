@@ -3,6 +3,7 @@ Ant-Version: Apache Ant 1.10.12
 Created-By: 17.0.10+7 (Eclipse Adoptium)
 Built-By: KlTim
 Main-Class: org.pmedv.blackboard.app.BlackBoard
+Enable-Native-Access: ALL-UNNAMED
 Class-Path:                  lib/lib/FastInfoset.jar                 l
  ib/RXTXcomm.jar                 lib/annotations-22.0.0.jar           
        lib/autocomplete.jar                 lib/beansbinding-1.2.1.jar

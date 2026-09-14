@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pmedv.core.app.AbstractApplication;
 import org.pmedv.core.context.AppContext;
+import org.pmedv.core.util.AppIcon;
 import org.pmedv.core.util.UiScale;
 import com.formdev.flatlaf.util.SystemInfo;
 
@@ -58,7 +59,9 @@ public class BlackBoard extends AbstractApplication {
 	@SuppressWarnings("unused")
 	public static void main(String[] args) throws Exception {
 
+		System.setProperty("awt.app.id", AppIcon.APP_ID);
 		UiScale.applyFromDesktop();
+		AppIcon.applyEarly();
 
 		// macOS
 		if( SystemInfo.isMacOS ) {

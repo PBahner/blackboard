@@ -6,4 +6,4 @@ then
   cd $RELATIVEDIR
 fi
 
-java -jar BlackBoard.jar
+java --enable-native-access=ALL-UNNAMED -jar BlackBoard.jar

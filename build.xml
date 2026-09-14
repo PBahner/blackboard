@@ -49,6 +49,7 @@
         <manifest file="MANIFEST.MF">
             <attribute name="Built-By" value="${user.name}"/>
             <attribute name="Main-Class" value="${mainclass}"/>
+            <attribute name="Enable-Native-Access" value="ALL-UNNAMED"/>
             <attribute name="Class-Path" value="
                 lib/lib/FastInfoset.jar
                 lib/RXTXcomm.jar

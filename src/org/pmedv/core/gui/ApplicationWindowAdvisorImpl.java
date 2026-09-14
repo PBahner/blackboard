@@ -22,12 +22,9 @@
  */
 package org.pmedv.core.gui;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GraphicsEnvironment;
-import java.awt.Image;
-import java.awt.MediaTracker;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
@@ -53,6 +50,7 @@ import org.pmedv.core.preferences.Preferences;
 import org.pmedv.core.provider.ApplicationPerspectiveProvider;
 import org.pmedv.core.provider.ApplicationWindowConfigurationProvider;
 import org.pmedv.core.services.ResourceService;
+import org.pmedv.core.util.AppIcon;
 import org.springframework.context.ApplicationContext;
 
 
@@ -128,6 +126,7 @@ public class ApplicationWindowAdvisorImpl implements ApplicationWindowAdvisor {
 
     @Override
     public void windowOpenedHook(WindowEvent e) {
+        AppIcon.apply(win);
     }
 
     @Override
@@ -161,19 +160,6 @@ public class ApplicationWindowAdvisorImpl implements ApplicationWindowAdvisor {
 
         log.info("setting look and feel to: " + UIManager.getLookAndFeel());
 
-        // construct app icon
-
-        Image iconImage = resources.getIcon("icon.application").getImage();
-
-        MediaTracker mt = new MediaTracker(win);
-        mt.addImage(iconImage, 0);
-
-        try {
-            mt.waitForAll();
-        } catch (InterruptedException e) {
-            // Silently ignore
-        }
-
         InputStream is = getClass().getClassLoader().getResourceAsStream("application.properties");
         Properties properties = new Properties();
         try {
@@ -183,7 +169,6 @@ public class ApplicationWindowAdvisorImpl implements ApplicationWindowAdvisor {
         }
 
         win.setTitle(windowConfig.getConfig().getTitle() + " Version " + properties.get("version"));
-        win.setIconImage(iconImage);
         win.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         win.addWindowListener(win);
 
@@ -217,6 +202,7 @@ public class ApplicationWindowAdvisorImpl implements ApplicationWindowAdvisor {
             win.setMaximizedBounds(env.getMaximumWindowBounds());
             win.setExtendedState(win.getExtendedState() | Frame.MAXIMIZED_BOTH);
         }
+        AppIcon.apply(win);
 //		if (!config.isStatusbarVisible())
 //			win.getStatusBar().setVisible(false);
 
