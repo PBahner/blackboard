@@ -90,6 +90,10 @@ public class DataSheetProvider {
 
 	private void createDefaultSheetList(File sheetFile) throws JAXBException, IOException {
 
+		if (!sheetsDir.exists() && !sheetsDir.mkdirs()) {
+			throw new IOException("Could not create directory " + sheetsDir.getAbsolutePath());
+		}
+
 		datasheetList = new DatasheetList();
 
 		ArrayList<DatasheetBean> sheets = new ArrayList<DatasheetBean>();
