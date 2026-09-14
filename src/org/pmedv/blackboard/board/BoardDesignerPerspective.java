@@ -103,6 +103,7 @@ import org.pmedv.core.perspectives.AbstractPerspective;
 import org.pmedv.core.preferences.Preferences;
 import org.pmedv.core.provider.ApplicationWindowConfigurationProvider;
 import org.pmedv.core.services.ResourceService;
+import org.pmedv.core.util.UiScale;
 import org.springframework.context.ApplicationContext;
 
 import com.formdev.flatlaf.util.UIScale;
@@ -163,6 +164,11 @@ public class BoardDesignerPerspective extends AbstractPerspective implements IMe
 				rootWindow.getWindowProperties().getTabProperties().getNormalButtonProperties().getCloseButtonProperties().setVisible(false);
 
 				editorArea = new TabWindow();
+				int iconTextGap = UiScale.px(8);
+				rootWindow.getRootWindowProperties().getTabWindowProperties().getTabProperties()
+						.getTitledTabProperties().getNormalProperties().setIconTextGap(iconTextGap);
+				editorArea.getWindowProperties().getTabProperties().getTitledTabProperties()
+						.getNormalProperties().setIconTextGap(iconTextGap);
 				editorArea.getWindowProperties().getTabProperties().getNormalButtonProperties().getCloseButtonProperties().setVisible(false);
 				editorArea.getWindowProperties().getTabProperties().getHighlightedButtonProperties().getCloseButtonProperties().setVisible(false);
 				editorArea.getWindowProperties().getTabProperties().getNormalButtonProperties().getMinimizeButtonProperties().setVisible(true);
