@@ -35,19 +35,19 @@ User data (parts, symbols, models, preferences) lives in `~/.BlackBoard` (`%USER
 
 ## Installation
 
-Use a release zip (`blackboard-bin-…zip`) or build one with ant.
+**Windows:** For Windows download the provided installer under releases (`BlackBoardSetup_…exe`). For a portable installation use the release zip file (`blackboard-bin-…zip`).
+
+**Linux:** Download a release zip or build one with ant. And start with `./Linux_Start.sh`.
 
 On the first start from the JAR, BlackBoard copies missing data folders (`parts`, `symbols`, `models`, `datasheets`, `simulators`) from the install directory into `~/.BlackBoard`. You do not copy those folders by hand like in earlier versions.
-
-**Linux:** start with `./Linux_Start.sh`.
-
-The first JAR start writes a GNOME/KDE menu entry to `~/.local/share/applications/org.pmedv.blackboard.desktop` and registers the app-icon. `.bb` files are registered as `application/x-blackboard`.
 
 You can also run:
 
 ```shell
 java --enable-native-access=ALL-UNNAMED -jar BlackBoard.jar
 ```
+
+**hint for Linux Users**: The first JAR start writes a GNOME/KDE menu entry to `~/.local/share/applications/org.pmedv.blackboard.desktop` and registers the app-icon. `.bb` files are registered as `application/x-blackboard`.
 
 
 ## Installation from source (development)
