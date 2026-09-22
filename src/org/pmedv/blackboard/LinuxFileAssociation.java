@@ -1,7 +1,6 @@
 package org.pmedv.blackboard;
 
 import org.pmedv.core.context.AppContext;
-import org.pmedv.core.util.AppIcon;
 
 import javax.imageio.ImageIO;
 import java.awt.*;

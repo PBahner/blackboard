@@ -40,6 +40,7 @@ import net.infonode.docking.TabWindow;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.pmedv.blackboard.AppIcon;
 import org.pmedv.blackboard.LookAndFeelUtil;
 import org.pmedv.core.beans.ApplicationPerspective;
 import org.pmedv.core.beans.ApplicationWindowConfiguration;
@@ -50,7 +51,6 @@ import org.pmedv.core.preferences.Preferences;
 import org.pmedv.core.provider.ApplicationPerspectiveProvider;
 import org.pmedv.core.provider.ApplicationWindowConfigurationProvider;
 import org.pmedv.core.services.ResourceService;
-import org.pmedv.core.util.AppIcon;
 import org.springframework.context.ApplicationContext;
 
 

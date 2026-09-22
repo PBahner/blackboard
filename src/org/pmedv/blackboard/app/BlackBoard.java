@@ -31,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.pmedv.blackboard.LinuxFileAssociation;
 import org.pmedv.core.app.AbstractApplication;
 import org.pmedv.core.context.AppContext;
-import org.pmedv.core.util.AppIcon;
+import org.pmedv.blackboard.AppIcon;
 import org.pmedv.core.util.UiScale;
 import com.formdev.flatlaf.util.SystemInfo;
 
