@@ -24,6 +24,7 @@ import com.sun.jna.Native;
 import com.sun.jna.platform.unix.X11;
 import com.sun.jna.platform.win32.Advapi32Util;
 import com.sun.jna.platform.win32.WinReg;
+import org.pmedv.core.context.AppContext;
 
 /**
  * Application icon. GNOME matches a {@code .desktop} file via WM_CLASS.
@@ -142,10 +143,13 @@ public final class AppIcon {
 	private static void installGnomeLauncher() throws Exception {
 		File installDir = AbstractApplication.detectInstallDir();
 
+		if (!AppContext.isRunningFromJar()) {
+			return;
+		}
+
 		File startScript = new File(installDir, "Linux_Start.sh");
 		File template = new File(installDir, APP_ID + ".desktop");
 
-		// Only install/update the launcher when running from an installation.
 		if (!startScript.isFile() || !template.isFile()) {
 			return;
 		}
