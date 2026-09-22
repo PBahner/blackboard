@@ -181,7 +181,7 @@ public abstract class AbstractApplication {
 	 * Directory that contains shipped data next to the JAR
 	 * (NSIS {@code $INSTDIR}); from the IDE it is the current directory.
 	 */
-	private static File detectInstallDir() {
+	public static File detectInstallDir() {
 		try {
 			java.net.URL location = AbstractApplication.class.getProtectionDomain().getCodeSource().getLocation();
 			File file = new File(location.toURI());

@@ -8,14 +8,15 @@ import java.awt.Window;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.imageio.ImageIO;
+
+import org.pmedv.core.app.AbstractApplication;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.sun.jna.Memory;
@@ -63,31 +64,38 @@ public final class AppIcon {
 		if (window == null) {
 			return;
 		}
-		if (!isLinux()) {
-			List<Image> icons = images();
-			if (!icons.isEmpty()) {
-				window.setIconImages(icons);
-			}
-			return;
+
+		List<Image> icons = images();
+		if (!icons.isEmpty()) {
+			window.setIconImages(icons);
 		}
-		try {
-			if (!window.isDisplayable()) {
-				window.addNotify();
+
+		if (isLinux()) {
+			try {
+				if (!window.isDisplayable()) {
+					window.addNotify();
+				}
+				setX11WmClass(window);
 			}
-			setX11WmClass(window);
-			installGnomeLauncher();
-		}
-		catch (Exception ignored) {
+			catch (Exception ignored) {
+			}
 		}
 	}
 
 	public static List<Image> images() {
 		boolean dark = useDarkIcon();
-		if (cached != null && cachedDark != null && cachedDark.booleanValue() == dark) {
+		if (cached != null && cachedDark != null && cachedDark == dark) {
 			return cached;
 		}
-		cachedDark = Boolean.valueOf(dark);
-		cached = render(dark);
+		cachedDark = dark;
+		cached = new ArrayList<>();
+		int[] sizes = { 16, 24, 32, 48 };
+        for (int size : sizes) {
+            BufferedImage img = paint(dark, size);
+            if (img != null) {
+                cached.add(img);
+            }
+        }
 		return cached;
 	}
 
@@ -101,13 +109,13 @@ public final class AppIcon {
 	private static boolean linuxOsDark() {
 		try {
 			String scheme = gsettings("color-scheme").toLowerCase();
-			if (scheme.indexOf("prefer-dark") >= 0) {
+			if (scheme.contains("prefer-dark")) {
 				return true;
 			}
-			if (scheme.indexOf("prefer-light") >= 0) {
+			if (scheme.contains("prefer-light")) {
 				return false;
 			}
-			return gsettings("gtk-theme").toLowerCase().indexOf("dark") >= 0;
+			return gsettings("gtk-theme").toLowerCase().contains("dark");
 		}
 		catch (Exception ignored) {
 			return false;
@@ -132,42 +140,56 @@ public final class AppIcon {
 	}
 
 	private static void installGnomeLauncher() throws Exception {
-		boolean dark = useDarkIcon();
-		BufferedImage buf = paint(dark, 48);
-		if (buf == null) {
-			return;
-		}
-		File dir = new File(System.getProperty("user.home"), ".local/share/blackboard");
-		if (!dir.exists() && !dir.mkdirs()) {
-			return;
-		}
-		File png = new File(dir, dark ? "icon-dark.png" : "icon-light.png");
-		ImageIO.write(buf, "png", png);
-		new File(dir, "app.png").delete();
-		new File(dir, "app-dark.png").delete();
-		new File(dir, "app-light.png").delete();
-		new File(dir, "bb-dark.png").delete();
-		new File(dir, "bb-light.png").delete();
+		File installDir = AbstractApplication.detectInstallDir();
 
-		File apps = new File(System.getProperty("user.home"), ".local/share/applications");
-		if (!apps.exists() && !apps.mkdirs()) {
+		File startScript = new File(installDir, "Linux_Start.sh");
+		File template = new File(installDir, APP_ID + ".desktop");
+
+		// Only install/update the launcher when running from an installation.
+		if (!startScript.isFile() || !template.isFile()) {
 			return;
 		}
-		File desktop = new File(apps, APP_ID + ".desktop");
-		OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(desktop), StandardCharsets.UTF_8);
-		try {
-			w.write("[Desktop Entry]\n");
-			w.write("Type=Application\n");
-			w.write("Name=BlackBoard\n");
-			w.write("Exec=true\n");
-			w.write("Icon=" + png.getAbsolutePath() + "\n");
-			w.write("StartupWMClass=" + APP_ID + "\n");
-			w.write("NoDisplay=true\n");
-			w.write("X-BlackBoard-Appearance=" + (dark ? "dark" : "light") + "\n");
+
+		boolean dark = useDarkIcon();
+
+		File iconDir = new File(
+				System.getProperty("user.home"),
+				".local/share/blackboard"
+		);
+
+		File icon = new File(
+				iconDir,
+				dark ? "icon-dark.png" : "icon-light.png"
+		);
+
+		BufferedImage image = paint(dark, 48);
+
+		if (image != null && (iconDir.isDirectory() || iconDir.mkdirs())) {
+			ImageIO.write(image, "png", icon);
 		}
-		finally {
-			w.close();
+
+		File applicationsDir = new File(
+				System.getProperty("user.home"),
+				".local/share/applications"
+		);
+
+		if (!applicationsDir.isDirectory() && !applicationsDir.mkdirs()) {
+			return;
 		}
+
+		File desktop = new File(applicationsDir, APP_ID + ".desktop");
+
+		String text = Files.readString(template.toPath());
+
+		String exec =
+				"Exec=/bin/bash \"" + startScript.getAbsolutePath() + "\"\n" +
+				"Path=" + installDir.getAbsolutePath();
+
+		if (icon.isFile()) {
+			exec += "\nIcon=" + icon.getAbsolutePath();
+		}
+
+		Files.writeString(desktop.toPath(), text.replace("Exec=Linux_Start.sh", exec));
 	}
 
 	private static void setX11WmClass(Window window) {
@@ -193,53 +215,28 @@ public final class AppIcon {
 		}
 	}
 
-	private static List<Image> render(boolean dark) {
-		List<Image> images = new ArrayList<Image>();
-		int[] sizes = { 16, 24, 32, 48 };
-		for (int i = 0; i < sizes.length; i++) {
-			BufferedImage img = paint(dark, sizes[i]);
-			if (img != null) {
-				images.add(img);
-			}
-		}
-		return images;
-	}
-
 	private static BufferedImage paint(boolean dark, int size) {
-		InputStream in = null;
-		try {
-			in = openSvg(dark);
-			if (in == null) {
-				return null;
-			}
-			FlatSVGIcon svg = new FlatSVGIcon(in);
-			int src = svg.getIconWidth() > 0 ? svg.getIconWidth() : 300;
-			int pad = 1;
-			int inner = Math.max(1, size - pad * 2);
-			BufferedImage img = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
-			Graphics2D g = img.createGraphics();
-			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-			g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-			g.setColor(Color.BLACK);
-			g.fillOval(pad, pad, inner, inner);
-			g.translate(pad, pad);
-			g.scale(inner / (double) src, inner / (double) src);
-			svg.paintIcon(null, g, 0, 0);
-			g.dispose();
-			return img;
-		}
-		catch (Exception ignored) {
-			return null;
-		}
-		finally {
-			if (in != null) {
-				try {
-					in.close();
-				}
-				catch (Exception ignored) {
-				}
-			}
-		}
+        try (InputStream in = openSvg(dark)) {
+            if (in == null) {
+                return null;
+            }
+            FlatSVGIcon svg = new FlatSVGIcon(in);
+            int src = svg.getIconWidth() > 0 ? svg.getIconWidth() : 300;
+            int pad = 1;
+            int inner = Math.max(1, size - pad * 2);
+            BufferedImage img = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = img.createGraphics();
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g.setColor(Color.BLACK);
+            g.fillOval(pad, pad, inner, inner);
+            g.translate(pad, pad);
+            g.scale(inner / (double) src, inner / (double) src);
+            svg.paintIcon(null, g, 0, 0);
+            g.dispose();
+            return img;
+        } catch (Exception ignored) {
+            return null;
+        }
 	}
 
 	private static InputStream openSvg(boolean dark) throws Exception {
@@ -248,24 +245,25 @@ public final class AppIcon {
 		if (in != null) {
 			return in;
 		}
-		File dir = new File(System.getProperty("user.dir"));
+		File installDir = AbstractApplication.detectInstallDir();
 		File[] candidates = {
-				new File(dir, "resources/" + name),
-				new File(dir, name)
+				new File("resources/" + name),
+				new File(name),
+				new File(installDir, name)
 		};
-		for (int i = 0; i < candidates.length; i++) {
-			if (candidates[i].isFile()) {
-				return new FileInputStream(candidates[i]);
-			}
-		}
+        for (File candidate : candidates) {
+            if (candidate.isFile()) {
+                return new FileInputStream(candidate);
+            }
+        }
 		return null;
 	}
 
 	private static boolean isLinux() {
-		return System.getProperty("os.name", "").toLowerCase().indexOf("linux") >= 0;
+		return System.getProperty("os.name", "").toLowerCase().contains("linux");
 	}
 
 	private static boolean isWindows() {
-		return System.getProperty("os.name", "").toLowerCase().indexOf("win") >= 0;
+		return System.getProperty("os.name", "").toLowerCase().contains("win");
 	}
 }
