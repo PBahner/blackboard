@@ -28,6 +28,7 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.pmedv.blackboard.LinuxFileAssociation;
 import org.pmedv.core.app.AbstractApplication;
 import org.pmedv.core.context.AppContext;
 import org.pmedv.core.util.AppIcon;
@@ -62,6 +63,7 @@ public class BlackBoard extends AbstractApplication {
 		System.setProperty("awt.app.id", AppIcon.APP_ID);
 		UiScale.applyFromDesktop();
 		AppIcon.applyEarly();
+		LinuxFileAssociation.install();
 
 		// macOS
 		if( SystemInfo.isMacOS ) {

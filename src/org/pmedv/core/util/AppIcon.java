@@ -182,14 +182,14 @@ public final class AppIcon {
 		String text = Files.readString(template.toPath());
 
 		String exec =
-				"Exec=/bin/bash \"" + startScript.getAbsolutePath() + "\"\n" +
+				"Exec=/bin/bash \"" + startScript.getAbsolutePath() + "\" %f\n" +
 				"Path=" + installDir.getAbsolutePath();
 
 		if (icon.isFile()) {
 			exec += "\nIcon=" + icon.getAbsolutePath();
 		}
 
-		Files.writeString(desktop.toPath(), text.replace("Exec=Linux_Start.sh", exec));
+		Files.writeString(desktop.toPath(), text.replace("Exec=Linux_Start.sh %f", exec));
 	}
 
 	private static void setX11WmClass(Window window) {
